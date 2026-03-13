@@ -18,6 +18,7 @@ from .sources import (
     source_delete,
     source_describe,
     source_get_content,
+    source_rename,
 )
 from .sharing import (
     notebook_share_status,
@@ -45,6 +46,10 @@ from .exports import (
 )
 from .notes import note
 from .server import server_info
+from .batch import batch
+from .cross_notebook import cross_notebook_query
+from .pipeline import pipeline
+from .smart_select import tag
 
 __all__ = [
     # Downloads (1 consolidated)
@@ -59,13 +64,14 @@ __all__ = [
     "notebook_create",
     "notebook_rename",
     "notebook_delete",
-    # Sources (6)
+    # Sources (7)
     "source_add",
     "source_list_drive",
     "source_sync_drive",
     "source_delete",
     "source_describe",
     "source_get_content",
+    "source_rename",
     # Sharing (4)
     "notebook_share_status",
     "notebook_share_public",
@@ -75,7 +81,7 @@ __all__ = [
     "research_start",
     "research_status",
     "research_import",
-    # Studio (4 - consolidated create + revise)
+    # Studio (4 - consolidated create + revise + list_types via status)
     "studio_create",
     "studio_status",
     "studio_delete",
@@ -89,4 +95,12 @@ __all__ = [
     "note",
     # Server (1)
     "server_info",
+    # Batch (1 consolidated — action: query|add_source|create|delete|studio)
+    "batch",
+    # Cross-notebook (1)
+    "cross_notebook_query",
+    # Pipeline (1 consolidated — action: run|list)
+    "pipeline",
+    # Tag/Smart Select (1 consolidated — action: add|remove|list|select)
+    "tag",
 ]

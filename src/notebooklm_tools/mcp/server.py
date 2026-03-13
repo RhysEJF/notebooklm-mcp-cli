@@ -76,6 +76,11 @@ def _register_tools():
         chat,
         exports,
         notes,
+        batch,
+        cross_notebook,
+        pipeline,
+        smart_select,
+        studio_advanced,
     )
     
     # Register collected tools with mcp

@@ -1,6 +1,6 @@
 # MCP Guide
 
-Complete reference for the NotebookLM MCP server - **29 tools** for AI assistants.
+Complete reference for the NotebookLM MCP server — **35 tools** for AI assistants.
 
 ## Installation
 
@@ -155,6 +155,57 @@ note(notebook_id, action="delete", note_id="...", confirm=True)
 |------|-------------|
 | `server_info` | Get version and check for updates |
 
+### Batch & Cross-Notebook (2 tools)
+
+| Tool | Description |
+|------|-------------|
+| `batch` | **Unified** — Batch operations across multiple notebooks (action: query, add_source, create, delete, studio) |
+| `cross_notebook_query` | Query multiple notebooks and get aggregated answers with per-notebook citations |
+
+**`batch` actions:**
+```python
+batch(action="query", query="What are the key findings?", notebook_names="AI Research, Dev Tools")
+batch(action="add_source", source_url="https://...", tags="ai,research")
+batch(action="create", titles="Project A, Project B, Project C")
+batch(action="delete", notebook_names="Old Project", confirm=True)
+batch(action="studio", artifact_type="audio", tags="research", confirm=True)
+```
+
+**`cross_notebook_query`:**
+```python
+cross_notebook_query(query="Compare approaches", notebook_names="Notebook A, Notebook B")
+cross_notebook_query(query="Summarize", tags="ai,research")
+cross_notebook_query(query="Everything", all=True)
+```
+
+### Pipelines (1 tool)
+
+| Tool | Description |
+|------|-------------|
+| `pipeline` | **Unified** — List or run multi-step workflows (action: list, run) |
+
+**`pipeline` actions:**
+```python
+pipeline(action="list")  # List available pipelines
+pipeline(action="run", notebook_id="...", pipeline_name="ingest-and-podcast", input_url="https://...")
+```
+
+**Built-in pipelines:** `ingest-and-podcast`, `research-and-report`, `multi-format`
+
+### Tags & Smart Select (1 tool)
+
+| Tool | Description |
+|------|-------------|
+| `tag` | **Unified** — Tag notebooks and find relevant ones (action: add, remove, list, select) |
+
+**`tag` actions:**
+```python
+tag(action="add", notebook_id="...", tags="ai,research,llm")
+tag(action="remove", notebook_id="...", tags="ai")
+tag(action="list")  # List all tagged notebooks
+tag(action="select", query="ai research")  # Find notebooks by tag match
+```
+
 ---
 
 ## Example Workflows
@@ -185,6 +236,33 @@ studio_create(notebook_id, artifact_type="flashcards", difficulty="hard", confir
 studio_create(notebook_id, artifact_type="report", report_format="Study Guide", confirm=True)
 ```
 
+### Tag, Batch & Cross-Notebook
+
+```
+# Tag notebooks for organization
+tag(action="add", notebook_id="abc", tags="ai,research")
+tag(action="add", notebook_id="def", tags="ai,product")
+
+# Find relevant notebooks
+tag(action="select", query="ai research") 
+
+# Query across tagged notebooks
+cross_notebook_query(query="What are the main conclusions?", tags="ai")
+
+# Batch generate podcasts for all tagged notebooks
+batch(action="studio", artifact_type="audio", tags="ai", confirm=True)
+```
+
+### Pipeline Automation
+
+```
+# List available pipelines
+pipeline(action="list")
+
+# Run a full ingest-and-podcast workflow
+pipeline(action="run", notebook_id="abc", pipeline_name="ingest-and-podcast", input_url="https://example.com")
+```
+
 ---
 
 ## Configuration
@@ -211,7 +289,7 @@ studio_create(notebook_id, artifact_type="report", report_format="Study Guide", 
 
 ## Context Window Tips
 
-This MCP has **29 tools** which consume context. Best practices:
+This MCP has **35 tools** which consume context. Best practices:
 
 - **Disable when not using**: In Claude Code, use `@notebooklm-mcp` to toggle
 - **Use unified tools**: `source_add`, `studio_create`, `download_artifact` handle multiple operations each

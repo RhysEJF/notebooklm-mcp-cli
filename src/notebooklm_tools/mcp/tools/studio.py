@@ -161,6 +161,7 @@ def studio_status(
         action: Action to perform:
             - status (default): List all artifacts with their status and URLs
             - rename: Rename an artifact (requires artifact_id and new_title)
+            - list_types: List all supported artifact types with their options
         artifact_id: Required for action="rename" - the artifact UUID to rename
         new_title: Required for action="rename" - the new title for the artifact
 
@@ -178,6 +179,10 @@ def studio_status(
             - summary: Counts of total, completed, in_progress
     """
     try:
+        if action == "list_types":
+            from .studio_advanced import _get_studio_types
+            return _get_studio_types()
+
         client = get_client()
 
         if action == "rename":

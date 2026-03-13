@@ -106,6 +106,10 @@ nlm status artifacts <notebook>
 | `nlm video` | Create video overviews (create) |
 | `nlm data-table` | Create data tables (create) |
 | `nlm share` | Manage notebook sharing (status, public, private, invite) |
+| `nlm batch` | Batch operations across multiple notebooks (query, add-source, create, delete, studio) |
+| `nlm cross` | Cross-notebook aggregated query (query) |
+| `nlm pipeline` | Multi-step notebook workflows (list, run) |
+| `nlm tag` | Tag notebooks and find relevant ones (add, remove, list, select) |
 | `nlm skill` | Install AI assistant skills (install, uninstall, list, show) |
 | `nlm doctor` | Diagnose installation, auth, browser, and AI tool configs |
 | `nlm setup` | Configure MCP server for AI tools (add, remove, list) |
@@ -594,6 +598,65 @@ nlm share private <notebook-id>             # Disable public access
 nlm share invite <notebook-id> <email> --role viewer  # Invite collaborator
 ```
 
+### Batch Operations (Multi-Notebook)
+
+Perform operations across multiple notebooks at once:
+
+```bash
+nlm batch query "What are the key takeaways?" --notebooks "id1,id2"
+nlm batch query "Summarize" --tags "ai,research"          # Select by tag
+nlm batch query "Summarize" --all                         # ALL notebooks
+
+nlm batch add-source --url "https://..." --notebooks "id1,id2"
+nlm batch add-source --url "https://..." --tags "research"
+
+nlm batch create "Project A, Project B, Project C"        # Create multiple
+nlm batch delete --notebooks "id1,id2" --confirm
+nlm batch studio --type audio --tags "research" --confirm
+```
+
+### Cross-Notebook Query
+
+Query multiple notebooks and get aggregated answers with per-notebook citations:
+
+```bash
+nlm cross query "What are the common themes?" --notebooks "id1,id2"
+nlm cross query "Compare approaches" --tags "ai,research"
+nlm cross query "Summarize everything" --all
+```
+
+### Pipelines (Multi-Step Workflows)
+
+Run predefined multi-step workflows on a notebook:
+
+```bash
+nlm pipeline list                                         # List available pipelines
+nlm pipeline run <notebook-id> ingest-and-podcast --url "https://..."
+nlm pipeline run <notebook-id> research-and-report --url "https://..."
+nlm pipeline run <notebook-id> multi-format                # Audio + report + flashcards
+```
+
+**Built-in pipelines:**
+- `ingest-and-podcast`: Add source → generate podcast
+- `research-and-report`: Research → import → generate report
+- `multi-format`: Generate audio + report + flashcards
+
+Custom pipelines: create YAML files in `~/.notebooklm-mcp-cli/pipelines/`
+
+### Tag & Smart Select
+
+Tag notebooks for organization and discovery:
+
+```bash
+nlm tag add <notebook-id> --tags "ai,research,llm"
+nlm tag add <notebook-id> --tags "product" --title "Product Notes"
+nlm tag remove <notebook-id> --tags "ai"
+nlm tag list                                              # List all tagged notebooks
+nlm tag select "ai research"                              # Find relevant notebooks
+```
+
+Tags are stored locally and used by `nlm tag select` and batch operations (`--tags` flag) to find relevant notebooks.
+
 ### Skill Commands (Install AI Assistant Skills)
 
 Install the NotebookLM skill for various AI coding assistants:
@@ -901,6 +964,8 @@ nlm download infographic <notebook-id> --id <infographic-id>
 18. **Drive source sync** - Use `nlm source stale <notebook>` or `nlm list stale-sources <notebook>` to check which Drive sources need syncing before running sync commands.
 19. **Use --wait for blocking source adds** - When adding sources before querying, use `nlm source add ... --wait` to block until processing completes. This ensures the source is ready for queries.
 20. **Export to Google Docs/Sheets** - Reports can be exported to Google Docs, Data Tables to Google Sheets. Use `nlm export to-docs/to-sheets <notebook> <artifact-id>`.
+21. **Batch with tags** - Tag notebooks first (`nlm tag add ... --tags "topic"`), then use `--tags` flag with batch commands for targeted multi-notebook operations.
+22. **Pipelines for automation** - Use `nlm pipeline list` to see available workflows, then `nlm pipeline run` for automated multi-step operations (ingest → generate).
 """
 
 

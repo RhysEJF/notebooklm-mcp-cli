@@ -32,6 +32,10 @@ from notebooklm_tools.cli.commands.studio import (
 from notebooklm_tools.cli.commands.download import app as download_app
 from notebooklm_tools.cli.commands.share import app as share_app
 from notebooklm_tools.cli.commands.export import app as export_app
+from notebooklm_tools.cli.commands.batch import app as batch_app
+from notebooklm_tools.cli.commands.cross import app as cross_app
+from notebooklm_tools.cli.commands.pipeline import app as pipeline_app
+from notebooklm_tools.cli.commands.tag import app as tag_app
 from notebooklm_tools.cli.commands.verbs import (
     create_app,
     list_app,
@@ -531,6 +535,10 @@ app.add_typer(export_app, name="export", help="Export artifacts to Google Docs/S
 app.add_typer(skill_app, name="skill", help="Install skills for AI tools")
 app.add_typer(setup_app, name="setup", help="Configure MCP server for AI tools")
 app.add_typer(doctor_app, name="doctor", help="Diagnose installation and configuration")
+app.add_typer(batch_app, name="batch", help="Batch operations across notebooks")
+app.add_typer(cross_app, name="cross", help="Cross-notebook queries")
+app.add_typer(pipeline_app, name="pipeline", help="Run multi-step pipelines")
+app.add_typer(tag_app, name="tag", help="Manage notebook tags")
 
 # Generation commands as top-level
 app.add_typer(audio_app, name="audio", help="Create audio overviews")

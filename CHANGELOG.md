@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.4.6] - 2026-03-12
+
+### Added
+- **Batch Operations** — Perform actions across multiple notebooks at once. Thanks to **@fabianafurtadoff** for this contribution (PR #90)!
+  - `nlm batch query` — Query multiple notebooks with the same question
+  - `nlm batch add-source` — Add a URL to multiple notebooks
+  - `nlm batch create` — Create multiple notebooks at once
+  - `nlm batch delete` — Delete multiple notebooks (requires `--confirm`)
+  - `nlm batch studio` — Generate artifacts across multiple notebooks
+  - MCP: Consolidated `batch` tool with `action` parameter (query|add_source|create|delete|studio)
+- **Cross-Notebook Query** — Query multiple notebooks and get aggregated answers with per-notebook citations. (PR #90, @fabianafurtadoff)
+  - `nlm cross query "question" --notebooks "id1,id2"` — Ask across specific notebooks
+  - `nlm cross query "question" --tags "ai,research"` — Query by tag
+  - MCP: `cross_notebook_query` tool
+- **Pipelines** — Define and execute multi-step notebook workflows. (PR #90, @fabianafurtadoff)
+  - `nlm pipeline list` — List available pipelines (3 builtin: ingest-and-podcast, research-and-report, multi-format)
+  - `nlm pipeline run <notebook> <pipeline-name>` — Execute a pipeline
+  - User-defined pipelines via YAML files in `~/.notebooklm-mcp-cli/pipelines/`
+  - MCP: Consolidated `pipeline` tool with `action` parameter (run|list)
+- **Smart Select & Tagging** — Tag notebooks and find relevant ones by keyword matching. (PR #90, @fabianafurtadoff)
+  - `nlm tag add <notebook> --tags "ai,research"` — Add tags
+  - `nlm tag remove <notebook> --tags "ai"` — Remove tags
+  - `nlm tag list` — List all tagged notebooks
+  - `nlm tag select "query"` — Find notebooks by tag match
+  - MCP: Consolidated `tag` tool with `action` parameter (add|remove|list|select)
+- **Studio List Types** — Reference of all artifact types and their options, accessible via `studio_status(action="list_types")`
+- **73 new unit tests** covering all new service modules (total: 576 tests)
+
+### Changed
+- **MCP Tool Consolidation** — Reduced 13 new tools to 4 consolidated tools with action parameters, keeping total MCP tools at 35 (down from what would have been 44). Follows existing patterns (`note`, `source_add`).
+
+### Fixed
+- **CLI import violations** — Fixed 3 CLI command files (`batch.py`, `cross.py`, `pipeline.py`) importing `get_client` from `mcp/tools/_utils` instead of `cli/utils`, violating architecture layering
+- **Missing UTF-8 encoding** — Added `encoding='utf-8'` to 6 file I/O calls in `smart_select.py` and `pipeline.py` to prevent `UnicodeDecodeError` on Windows
+- **Cross-notebook display crash** — Fixed `sources_used` field handling in `cross.py` display formatting (could crash on string values)
+
 ## [0.4.5] - 2026-03-10
 
 ### Fixed

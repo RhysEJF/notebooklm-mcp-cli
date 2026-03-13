@@ -154,6 +154,49 @@ nlm share invite <notebook> email@example.com  # Invite viewer
 nlm share invite <notebook> email --role editor  # Invite editor
 ```
 
+### Batch Operations
+
+```bash
+nlm batch query "What are the key takeaways?" --notebooks "id1,id2"
+nlm batch query "Summarize" --tags "ai,research"          # Query by tag
+nlm batch query "Summarize" --all                         # Query ALL notebooks
+nlm batch add-source --url "https://..." --notebooks "id1,id2"
+nlm batch create "Project A, Project B, Project C"        # Create multiple
+nlm batch delete --notebooks "id1,id2" --confirm          # Delete multiple
+nlm batch studio --type audio --tags "research" --confirm # Generate across notebooks
+```
+
+### Cross-Notebook Query
+
+```bash
+nlm cross query "What features are discussed?" --notebooks "id1,id2"
+nlm cross query "Compare approaches" --tags "ai,research"
+nlm cross query "Summarize everything" --all              # Query ALL notebooks
+```
+
+### Pipelines
+
+```bash
+nlm pipeline list                                         # List available pipelines
+nlm pipeline run <notebook> ingest-and-podcast --url "https://..."
+nlm pipeline run <notebook> research-and-report --url "https://..."
+nlm pipeline run <notebook> multi-format                  # Audio + report + flashcards
+```
+
+**Built-in pipelines:** `ingest-and-podcast`, `research-and-report`, `multi-format`
+
+Create custom pipelines: add YAML files to `~/.notebooklm-mcp-cli/pipelines/`
+
+### Tag & Smart Select
+
+```bash
+nlm tag add <notebook> --tags "ai,research,llm"           # Add tags
+nlm tag add <notebook> --tags "ai" --title "My Notebook"  # With display title
+nlm tag remove <notebook> --tags "ai"                     # Remove tags
+nlm tag list                                              # List all tagged notebooks
+nlm tag select "ai research"                              # Find notebooks by tag match
+```
+
 ### Chat Configuration
 
 ```bash

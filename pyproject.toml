@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "notebooklm-mcp-cli"
-version = "0.4.5"
+version = "0.4.6"
 description = "Unified CLI and MCP server for Google NotebookLM"
 readme = "README.md"
 license = "MIT"
@@ -33,6 +33,7 @@ dependencies = [
     "websocket-client>=1.6.0",  # CDP login
     "platformdirs>=4.0.0",
     "fastmcp>=0.1.0",
+    "pyyaml>=6.0",
 ]
 
 
