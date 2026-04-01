@@ -19,9 +19,17 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlparse
 
-from httpx import Client
+from httpx import Client, HTTPTransport
 
-httpx_client = Client()
+# Disable proxy for localhost CDP connections — system proxies (Surge, Clash, etc.)
+# can intercept localhost requests and break Chrome DevTools Protocol connections.
+# See: https://github.com/jacob-bd/notebooklm-mcp-cli/issues/119
+httpx_client = Client(
+    mounts={
+        "http://": HTTPTransport(proxy=None),
+        "https://": HTTPTransport(proxy=None),
+    }
+)
 import websocket  # noqa: E402
 
 _cached_ws: websocket.WebSocket | None = None
