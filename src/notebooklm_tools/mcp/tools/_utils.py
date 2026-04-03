@@ -175,6 +175,7 @@ def register_all_tools(mcp):
 
 
 # Essential cookies for NotebookLM API authentication
+# Canonical allowlist — must match ALLOWED_COOKIE_NAMES in cdp.py
 ESSENTIAL_COOKIES = [
     "SID",
     "HSID",
@@ -183,15 +184,10 @@ ESSENTIAL_COOKIES = [
     "SAPISID",  # Core auth cookies
     "__Secure-1PSID",
     "__Secure-3PSID",  # Secure session variants
-    "__Secure-1PAPISID",
-    "__Secure-3PAPISID",  # Secure API variants
-    "OSID",
-    "__Secure-OSID",  # Origin-bound session
+    "__Secure-1PAPISID",  # Secure API variant
     "__Secure-1PSIDTS",
     "__Secure-3PSIDTS",  # Timestamp tokens (rotate frequently)
-    "SIDCC",
-    "__Secure-1PSIDCC",
-    "__Secure-3PSIDCC",  # Session cookies (rotate frequently)
+    "NID",  # Preferences (may be optional)
 ]
 
 

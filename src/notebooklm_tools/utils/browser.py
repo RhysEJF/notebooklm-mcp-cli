@@ -97,6 +97,6 @@ def validate_notebooklm_cookies(cookies: dict[str, str]) -> bool:
     This is a basic check - actual validation requires making an API call.
     """
     # Check for essential Google auth cookies
-    essential_patterns = ["SID", "HSID", "SSID", "APISID", "SAPISID"]
+    essential_patterns = ["SID", "HSID", "SSID", "APISID", "SAPISID", "__Secure-1PSID", "__Secure-1PSIDTS"]
     found = sum(1 for pattern in essential_patterns if any(pattern in name for name in cookies))
     return found >= 2  # At least 2 essential cookies should be present

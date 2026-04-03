@@ -304,7 +304,7 @@ def parse_cookies_from_chrome_format(cookies_list: list[dict]) -> dict[str, str]
 
 
 # Tokens that need to be present for auth to work
-REQUIRED_COOKIES = ["SID", "HSID", "SSID", "APISID", "SAPISID"]
+REQUIRED_COOKIES = ["SID", "HSID", "SSID", "APISID", "SAPISID", "__Secure-1PSID", "__Secure-1PSIDTS"]
 
 
 def validate_cookies(cookies: dict[str, str]) -> bool:

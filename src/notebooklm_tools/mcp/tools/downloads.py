@@ -1,10 +1,25 @@
 """Download tools - Consolidated download_artifact for all artifact types."""
 
+import os
+from pathlib import Path
 from typing import Any
 
 from ...services import ServiceError
 from ...services import downloads as downloads_service
 from ._utils import get_client, logged_tool
+
+
+def _validate_output_path(output_path: str) -> str:
+    """Reject path traversal and writes outside $HOME."""
+    resolved = Path(output_path).resolve()
+    home = Path.home().resolve()
+    if ".." in Path(output_path).parts:
+        raise ValueError(f"Path traversal ('..') is not allowed in output_path: {output_path}")
+    if not str(resolved).startswith(str(home)):
+        raise ValueError(
+            f"output_path must be within your home directory ({home}), got: {resolved}"
+        )
+    return str(resolved)
 
 
 @logged_tool()
@@ -48,6 +63,7 @@ async def download_artifact(
         download_artifact(notebook_id="abc123", artifact_type="slide_deck", output_path="slides.pptx", slide_deck_format="pptx")
     """
     try:
+        output_path = _validate_output_path(output_path)
         client = get_client()
         result = await downloads_service.download_async(
             client,
