@@ -188,6 +188,11 @@ ESSENTIAL_COOKIES = [
     "__Secure-1PSIDTS",
     "__Secure-3PSIDTS",  # Timestamp tokens (rotate frequently)
     "NID",  # Preferences (may be optional)
+    "SIDCC",
+    "__Secure-1PSIDCC",
+    "__Secure-3PSIDCC",  # Session integrity (rotate frequently)
+    "OSID",
+    "__Secure-OSID",  # Origin-bound session
 ]
 
 

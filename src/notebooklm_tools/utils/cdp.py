@@ -674,6 +674,9 @@ def get_page_cookies(ws_url: str) -> list[dict]:
         "__Secure-3PSID", "__Secure-3PSIDTS",
         "__Secure-1PAPISID",
         "NID",
+        # Session integrity & origin-bound (documented as essential)
+        "SIDCC", "__Secure-1PSIDCC", "__Secure-3PSIDCC",
+        "OSID", "__Secure-OSID",
     }
     ALLOWED_DOMAINS = {".google.com", "notebooklm.google.com"}
 
