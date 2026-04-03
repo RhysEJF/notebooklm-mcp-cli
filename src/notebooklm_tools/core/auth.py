@@ -20,6 +20,48 @@ from notebooklm_tools.utils.config import get_base_url
 # Use logging instead of print to avoid corrupting MCP stdio protocol
 logger = logging.getLogger(__name__)
 
+# --- Secure cookie storage via OS keychain ---
+_KEYRING_SERVICE = "notebooklm-mcp-cli"
+
+
+def _keyring_available() -> bool:
+    """Check if the keyring library is installed and a backend is usable."""
+    try:
+        import keyring
+        keyring.get_credential(_KEYRING_SERVICE, "probe")
+        return True
+    except Exception:
+        return False
+
+
+def _save_cookies_to_keyring(profile_name: str, cookies_json: str) -> bool:
+    """Store cookie JSON in the OS keychain. Returns True on success."""
+    try:
+        import keyring
+        keyring.set_password(_KEYRING_SERVICE, f"{profile_name}/cookies", cookies_json)
+        return True
+    except Exception as e:
+        logger.warning(f"Keyring save failed, falling back to file: {e}")
+        return False
+
+
+def _load_cookies_from_keyring(profile_name: str) -> str | None:
+    """Load cookie JSON from the OS keychain. Returns None if unavailable."""
+    try:
+        import keyring
+        return keyring.get_password(_KEYRING_SERVICE, f"{profile_name}/cookies")
+    except Exception:
+        return None
+
+
+def _delete_cookies_from_keyring(profile_name: str) -> None:
+    """Remove cookies from the OS keychain (best-effort)."""
+    try:
+        import keyring
+        keyring.delete_password(_KEYRING_SERVICE, f"{profile_name}/cookies")
+    except Exception:
+        pass
+
 
 @dataclass
 class AuthTokens:
@@ -117,6 +159,15 @@ def load_cached_tokens() -> AuthTokens | None:
     try:
         with open(cache_path, encoding="utf-8") as f:
             data = json.load(f)
+
+        # Check if tokens are stored in OS keychain
+        if isinstance(data, dict) and data.get("__storage") == "keychain":
+            keychain_data = _load_cookies_from_keyring("__legacy__")
+            if keychain_data is None:
+                logger.warning("Cached tokens reference keychain but keychain entry missing")
+                return None
+            data = json.loads(keychain_data)
+
         tokens = AuthTokens.from_dict(data)
 
         # Just warn if tokens are old, but still return them
@@ -138,13 +189,21 @@ def save_tokens_to_cache(tokens: AuthTokens, silent: bool = False) -> None:
         silent: If True, don't print confirmation message (for auto-updates)
     """
     cache_path = get_cache_path()
-    with open(cache_path, "w", encoding="utf-8") as f:
-        json.dump(tokens.to_dict(), f, indent=2)
+    tokens_json = json.dumps(tokens.to_dict(), indent=2)
+    # Try OS keychain first, fall back to file
+    if _save_cookies_to_keyring("__legacy__", tokens_json):
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump({"__storage": "keychain"}, f, indent=2)
+        if not silent:
+            logger.info("Auth tokens cached to OS keychain")
+    else:
+        with open(cache_path, "w", encoding="utf-8") as f:
+            f.write(tokens_json)
+        if not silent:
+            logger.info(f"Auth tokens cached to {cache_path}")
     # Restrict permissions so only the owner can read/write auth tokens
     with contextlib.suppress(OSError):
         os.chmod(cache_path, 0o600)
-    if not silent:
-        logger.info(f"Auth tokens cached to {cache_path}")
 
 
 def extract_tokens_via_chrome_devtools() -> AuthTokens | None:
@@ -353,7 +412,18 @@ class AuthManager:
             raise ProfileNotFoundError(self.profile_name)
 
         try:
-            cookies = json.loads(self.cookies_file.read_text(encoding="utf-8"))
+            raw = json.loads(self.cookies_file.read_text(encoding="utf-8"))
+            # Check if cookies are stored in OS keychain
+            if isinstance(raw, dict) and raw.get("__storage") == "keychain":
+                keychain_data = _load_cookies_from_keyring(self.profile_name)
+                if keychain_data is None:
+                    raise AuthenticationError(
+                        message=f"Cookies for profile '{self.profile_name}' not found in keychain",
+                        hint="Try 'nlm login' to re-authenticate.",
+                    )
+                cookies = json.loads(keychain_data)
+            else:
+                cookies = raw
             metadata = {}
             if self.metadata_file.exists():
                 metadata = json.loads(self.metadata_file.read_text(encoding="utf-8"))
@@ -414,10 +484,17 @@ class AuthManager:
         # Set restrictive permissions on the directory
         self.profile_dir.chmod(0o700)
 
-        # Save cookies
-        self.cookies_file.write_text(
-            json.dumps(cookies, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        # Save cookies — prefer OS keychain, fall back to encrypted-at-rest file
+        cookies_json = json.dumps(cookies, indent=2, ensure_ascii=False)
+        if _save_cookies_to_keyring(self.profile_name, cookies_json):
+            # Write a sentinel so load_profile knows to check keychain
+            self.cookies_file.write_text(
+                '{"__storage": "keychain"}', encoding="utf-8"
+            )
+            logger.info("Cookies stored in OS keychain")
+        else:
+            self.cookies_file.write_text(cookies_json, encoding="utf-8")
+            logger.warning("Cookies stored as file (keyring unavailable)")
         self.cookies_file.chmod(0o600)
 
         # Save metadata

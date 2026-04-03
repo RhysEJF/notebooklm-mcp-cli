@@ -660,16 +660,31 @@ def execute_cdp_command(
 
 
 def get_page_cookies(ws_url: str) -> list[dict]:
-    """Get all cookies for the page via CDP.
+    """Get only the cookies required for NotebookLM via CDP.
 
-    This is the key function that avoids keychain access!
-    Uses Network.getAllCookies CDP command to get cookies for all domains.
+    Filters to a strict allowlist of cookie names and Google domains
+    to avoid storing full Google session cookies (Gmail, Drive, etc.).
 
     Returns:
-        List of cookie objects (dicts) including name, value, domain, path, etc.
+        List of filtered cookie objects (dicts) for NotebookLM only.
     """
-    result = execute_cdp_command(ws_url, "Network.getAllCookies")
-    return result.get("cookies", [])
+    ALLOWED_COOKIE_NAMES = {
+        "SID", "HSID", "SSID", "APISID", "SAPISID",
+        "__Secure-1PSID", "__Secure-1PSIDTS",
+        "__Secure-3PSID", "__Secure-3PSIDTS",
+        "__Secure-1PAPISID",
+        "NID",
+    }
+    ALLOWED_DOMAINS = {".google.com", "notebooklm.google.com"}
+
+    result = execute_cdp_command(ws_url, "Network.getCookies",
+                                {"urls": ["https://notebooklm.google.com/"]})
+    all_cookies = result.get("cookies", [])
+    return [
+        c for c in all_cookies
+        if c.get("domain", "") in ALLOWED_DOMAINS
+        and c.get("name", "") in ALLOWED_COOKIE_NAMES
+    ]
 
 
 def get_page_html(ws_url: str) -> str:
